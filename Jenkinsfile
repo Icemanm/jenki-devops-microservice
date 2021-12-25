@@ -6,6 +6,6 @@ node {
 		echo "Test"
 	}
 	stage('integraion Test') {
-		echo "Test"
+		echo "integraion Test"
 	}
 }
