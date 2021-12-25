@@ -17,4 +17,15 @@ pipeline {
 			}
 		}
 	}
+	post {
+		always {
+			echo 'im runing always'
+		}
+		success {
+			echo 'yes its working'
+		}
+		failure {
+			echo 'hoo no!'
+		}
+	}
 }
