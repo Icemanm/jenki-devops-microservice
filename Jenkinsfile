@@ -7,7 +7,7 @@ pipeline {
 		PATH = "$dockerHome/bin:/$mavenHome/bin:$PATH"
 	}
 	stages{
-		stage('Build') {
+		stage('Checkout') {
 			steps {
 				sh 'mvn --version'
 				sh 'docker version'
@@ -17,17 +17,45 @@ pipeline {
 				echo "BUILD_ID - $env.BUILD_ID"
 				echo "JOB_NAME - $env.JOB_NAME"
 				echo "BUILD_TAG - $env.BUILD_TAG"
-				echo "URL - $env.BUILD_URL"
+				echo "BUILD_URL - $env.BUILD_URL"
+			}
+		}
+		stage('Compile') {
+			steps {
+				sh "mvn clean compile"
 			}
 		}
 		stage('test') {
 			steps {
-				echo "test"
+				sh "mvn test"
 			}
 		}
 		stage('integration test') {
 			steps {
-				echo "integration test"
+				sh "mvn failsafe:integration-test failsafe:verify"
+			}
+		}
+		stage('Peckage') {
+			steps {
+				sh "mvn packege -DskipTests"
+			}
+		}
+		stage('Build Docker image') {
+			steps {
+				script {
+					dockerImage = docker.BUILD("icemanm/currency-exchange-microservice:$env.BUILD_TAG")
+				}
+			}
+		}
+		stage('Push Docker image') {
+			steps {
+				script {
+					docker.withRegistry('', 'dockerhub'){
+						dockerImage.push();
+						dockerImage.push('latest');
+
+					}
+				}
 			}
 		}
 	}
